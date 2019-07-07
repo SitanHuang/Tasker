@@ -1,6 +1,6 @@
 CURRENT_YEAR = moment().format('YY');
 DATE_REGEX = /^(\d{1,2})\/(\d{1,2})(\/(\d{1,2}))?$|^tomorrow|today$/;
-MODIFIER_REGEX = /^(.+)\:(.+)$/;
+MODIFIER_REGEX = /^([^:]+)\:([^:]+)$/;
 
 function parseDate(date) {
   let match = date.match(DATE_REGEX);
@@ -19,8 +19,8 @@ function parseDate(date) {
   return moment(`${m}/${d}/${y}`, 'M/D/YY').valueOf();
 }
 
-function task(command) {
-  let entry = {
+function task(command, original) {
+  let entry = original || {
     name: '',
     tags: [],
     due: 0,
@@ -30,7 +30,9 @@ function task(command) {
     created: moment().valueOf()
   };
 
-  let groups = command.replace(/(\#|\!|\~)/g, ' $1').split(' ').filter(x => x.length);
+  let name = '';
+
+  let groups = command.replace(/[^:](\#|\!|\~)/g, ' $1').split(' ').filter(x => x.length);
 
   for (let i = 0; i < groups.length; i++) {
     let group = groups[i];
@@ -58,11 +60,11 @@ function task(command) {
 
     // add to name
     if (!remove) {
-      entry.name += group + ' ';
+      name += group + ' ';
     }
   }
 
-  entry.name = entry.name.trim().replace(/ +/g, ' ');
+  entry.name = (name.length ? name : (original ? original.name : '')).trim().replace(/ +/g, ' ');
   entry.tags = entry.tags.sort();
 
   return entry;
