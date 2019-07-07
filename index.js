@@ -2,12 +2,14 @@ var $input = $('input.top');
 var $console = $('div.console');
 
 function next() {
+  updateAll();
+
   let inputValue = $input.val();
 
   if (inputValue.trim().toLowerCase() == 'help') {
     $console.html('<pre>' +
 `
-Version: 7/6
+Version: 7/6 WITH RECUR
 
 To create your first entry, try:
 
@@ -32,6 +34,16 @@ today - create entry with due date to today
 tomorrow - create entry with due date to tomorrow
 ...:... - create entry with modifier
 
+=== modifiers ===
+wait:.../.../...
+wait:.../...
+every:1days
+every:1months
+
+days-d
+months-M
+weeks-w
+
 === commands ===
 reset - clear all entries
 help - show this message again
@@ -39,6 +51,7 @@ help - show this message again
 === search ===
 filter:due
 filter:!due
+filter:hidden
 sort:due
 sort:age / sort:created
 #...
@@ -95,6 +108,8 @@ sort:age / sort:created
     entry.tags.forEach(tag => query = query.filter(x => x.tags.indexOf(tag) >= 0));
   }
 
+  let showHidden = false;
+
   entry.modifiers.forEach(x => {
     if (x[0].toLowerCase() == 'sort') {
       if (x[1].toLowerCase() == 'due') {
@@ -112,12 +127,17 @@ sort:age / sort:created
         query = query.filter(x => x.due);
       } else if (x[1].toLowerCase() == '!due') {
         query = query.filter(x => !x.due);
+      } else if (x[1].toLowerCase() == 'hidden') {
+        showHidden = true;
+        query = query.filter(x => x.hidden);
       }
     }
   });
 
   // ======= display =======
   query.forEach(entry => {
+    if (entry.hidden && !showHidden) return;
+
     let tags = entry.tags.map(x => `<tag>#${x}</tag>`).join('') + ' ';
 
     let dueInDays = Math.ceil((entry.due - moment().valueOf()) / 86400000);
@@ -160,6 +180,10 @@ sort:age / sort:created
     })).append('<span>&nbsp;</span>').append($(`<b style="background: black;color: white;">MOD</b>`).click(() => {
       $input.val(`mod${entry.created} ${entry.name}`);
       $input[0].focus();
+    })).append('<span>&nbsp;</span>').append($(`<b style="background: black;color: white;">HIDE</b>`).click(() => {
+      entry.hidden = !entry.hidden;
+      save();
+      next();
     }));
 
     $tr.click(() => {

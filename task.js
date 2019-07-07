@@ -32,7 +32,7 @@ function task(command, original) {
 
   let name = '';
 
-  let groups = command.replace(/[^:](\#|\!|\~)/g, ' $1').split(' ').filter(x => x.length);
+  let groups = command.replace(/([^:])(\#|\!|\~)/g, ' $1$2').split(' ').filter(x => x.length);
 
   for (let i = 0; i < groups.length; i++) {
     let group = groups[i];
@@ -49,6 +49,12 @@ function task(command, original) {
       entry.due = parseDate(group);
     } else if (match = group.match(MODIFIER_REGEX)) { // asdf:asdf
       remove = true;
+      match[1] = match[1].toLowerCase();
+      if(match[1] == 'wait') {
+        entry.hidden = true;
+        entry.wait = true;
+      }
+
       entry.modifiers.push([match[1], match[2]]);
     } else if (group == '!') {
       remove = true;

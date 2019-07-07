@@ -9,6 +9,8 @@ URGENCY_TAGS_COEFFICIENT = 1.0;
 URGENCY_AGE_MAX = 365;
 
 function urgency(task) {
+  if (task.hidden) return -1;
+
   let urgency = 0;
 
   let now = moment().valueOf() / 86400000.0;
