@@ -32,7 +32,7 @@ function task(command, original) {
 
   let name = '';
 
-  let groups = command.replace(/([^:])(\#|\!|\~)/g, ' $1$2').split(' ').filter(x => x.length);
+  let groups = command.replace(/([^:])(\#|\!|\~)/g, '$1 $2').split(' ').filter(x => x.length);
 
   for (let i = 0; i < groups.length; i++) {
     let group = groups[i];
